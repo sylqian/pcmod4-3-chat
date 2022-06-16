@@ -9,22 +9,36 @@ const demoMessage =	{
     createdAt: new Date(),
     user: {
         _id: 2,
-        name: 'Demo person',
+        name: 'Kind person',
         avatar: 'https://placeimg.com/140/140/any'
     }
 }
 
 export default function ChatScreen() {
-    useState [messages, setMessages] = useState([])
+    const [messages, setMessages] = useState([])
     useEffect (() => {
         setMessages([demoMessage])
     }, [])
 
-  return (
-    <View>
-      <Text>ChatScreen</Text>
-    </View>
-  )
-}
+    function sendMessages(newMessages) {
+        console.log(newMessages);
+        setMessages([...messages, ...newMessages]);
+    }
+
+    return (
+    <GiftedChat
+    messages={messages}
+    onSend={(newMessages) => sendMessages(newMessages)}
+    renderUsernameOnMessage={true}
+    listViewProps={{
+        style: {
+          backgroundColor: "#666",
+        },
+    }}
+    user={{
+        _id: 1,}}
+/>
+    );
+    }
 
 const styles = StyleSheet.create({})
