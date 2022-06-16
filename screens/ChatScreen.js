@@ -1,7 +1,8 @@
 // rnfs
-import { StyleSheet, Text, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { GiftedChat } from 'react-native-gifted-chat'
+import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { GiftedChat } from 'react-native-gifted-chat';
+import firebase from "../database/firebaseDB";
 
 const demoMessage =	{
     _id: 1,
@@ -14,21 +15,34 @@ const demoMessage =	{
     }
 }
 
+const db = firebase.firestore().collection("messages");
+
 export default function ChatScreen() {
     const [messages, setMessages] = useState([])
     useEffect (() => {
-        setMessages([demoMessage])
-    }, [])
+        const unsubscribe = db
+        .orderBy("createdAt", "desc")
+        .onSnapshot((collectionSnapshot) => {
+          const messages = collectionSnapshot.docs.map((doc) => {
+            const date = doc.data().createdAt.toDate();
+            const newDoc = { ...doc.data(), createdAt: date };
+            return newDoc;
+          });
+          setMessages(messages);
+        });
+      return unsubscribe;
+    }, []);
+  
 
     function sendMessages(newMessages) {
         console.log(newMessages);
-        setMessages([...messages, ...newMessages]);
+        db.add(newMessages[0]);
     }
 
     return (
     <GiftedChat
     messages={messages}
-    onSend={(newMessages) => sendMessages(newMessages)}
+    onSend={sendMessages}
     renderUsernameOnMessage={true}
     listViewProps={{
         style: {
@@ -36,7 +50,7 @@ export default function ChatScreen() {
         },
     }}
     user={{
-        _id: 1,}}
+        _id: 1, name: "Bob" }}
 />
     );
     }
